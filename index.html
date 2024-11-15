@@ -82,8 +82,9 @@
                 <tr>
                     <th>Číslo</th>
                     <th>Odpověď uživatele</th>
-                    <th>Rozdíl</th>
                     <th>Správná odpověď</th>
+                    <th>Zaokrouhleno na</th>
+                    <th>Rozdíl</th>
                 </tr>
             </thead>
             <tbody id="history-body">
@@ -141,12 +142,14 @@
             const newRow = document.createElement("tr");
 
             const difference = Math.abs(userAnswer - correctAnswer);
+            const roundingResult = getRoundedNumber(randomNumber, roundingType);
 
             newRow.innerHTML = `
                 <td>${randomNumber}</td>
                 <td>${userAnswer}</td>
-                <td>${difference}</td>
                 <td>${correctAnswer}</td>
+                <td>${roundingResult}</td>
+                <td>${difference}</td>
             `;
 
             historyBody.appendChild(newRow);
