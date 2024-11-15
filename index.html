@@ -17,6 +17,26 @@
         .stats {
             margin-top: 10px;
         }
+        #history {
+            margin-top: 20px;
+            text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+            width: 80%;
+            max-width: 600px;
+        }
+        #history table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #history th, #history td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        #history th {
+            background-color: #f4f4f4;
+        }
     </style>
 </head>
 <body>
@@ -29,6 +49,21 @@
     <div class="stats">
         <p>Správně: <span id="correct-count">0</span></p>
         <p>Špatně: <span id="incorrect-count">0</span></p>
+    </div>
+    <div id="history">
+        <h2>Historie špatných odpovědí</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Číslo</th>
+                    <th>Uživatelská odpověď</th>
+                    <th>Správná odpověď</th>
+                </tr>
+            </thead>
+            <tbody id="history-body">
+                <!-- Historie bude dynamicky přidávána sem -->
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -70,6 +105,19 @@
             }
         }
 
+        function addToHistory(randomNumber, userAnswer, correctAnswer) {
+            const historyBody = document.getElementById("history-body");
+            const newRow = document.createElement("tr");
+
+            newRow.innerHTML = `
+                <td>${randomNumber}</td>
+                <td>${userAnswer}</td>
+                <td>${correctAnswer}</td>
+            `;
+
+            historyBody.appendChild(newRow);
+        }
+
         function checkAnswer() {
             const userInput = Number(document.getElementById("user-input").value);
             const correctAnswer = getRoundedNumber(randomNumber, roundingType);
@@ -82,6 +130,7 @@
                 incorrectCount++;
                 document.getElementById("result").textContent = `Špatně! Správná odpověď je ${correctAnswer}.`;
                 document.getElementById("result").style.color = "red";
+                addToHistory(randomNumber, userInput, correctAnswer);
             }
 
             document.getElementById("correct-count").textContent = correctCount;
