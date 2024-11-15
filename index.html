@@ -102,12 +102,10 @@
 
         function getRoundedNumber(number, type) {
             switch (type) {
-                case "tisíce":
-                    return Math.floor((number + 500) / 1000) * 1000;
                 case "stovky":
-                    return Math.floor((number + 50) / 100) * 100;
+                    return Math.floor((number + 500) / 1000) * 1000;
                 case "desítky":
-                    return Math.floor((number + 5) / 10) * 10;
+                    return Math.floor((number + 50) / 100) * 100;
                 case "jednotky":
                     return number; // Jednotky nemění hodnotu
                 default:
