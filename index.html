@@ -14,8 +14,8 @@
             margin-top: 20px;
             font-weight: bold;
         }
-        #new-number {
-            margin-top: 20px;
+        .stats {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -24,21 +24,35 @@
     <p>Zaokrouhli zobrazené číslo na <span id="rounding-type"></span>.</p>
     <p id="random-number"></p>
     <input type="number" id="user-input" placeholder="Zadej zaokrouhlené číslo">
-    <button id="check-answer">Ověřit odpověď</button>
+    <p>Stiskni klávesu: <strong id="required-key"></strong> pro potvrzení.</p>
     <p id="result"></p>
-    <button id="new-number">Nové číslo</button>
+    <div class="stats">
+        <p>Správně: <span id="correct-count">0</span></p>
+        <p>Špatně: <span id="incorrect-count">0</span></p>
+    </div>
 
     <script>
         let randomNumber = 0;
         let roundingType = "";
+        let requiredKey = "";
+        let correctCount = 0;
+        let incorrectCount = 0;
 
         const roundingLevels = ["tisíce", "stovky", "desítky"];
+        const allKeys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        function generateRandomKey() {
+            return allKeys.charAt(Math.floor(Math.random() * allKeys.length));
+        }
 
         function generateNumber() {
             randomNumber = Math.floor(Math.random() * 10001);
             roundingType = roundingLevels[Math.floor(Math.random() * roundingLevels.length)];
+            requiredKey = generateRandomKey();
+
             document.getElementById("random-number").textContent = `Číslo: ${randomNumber}`;
             document.getElementById("rounding-type").textContent = roundingType;
+            document.getElementById("required-key").textContent = requiredKey;
             document.getElementById("result").textContent = "";
             document.getElementById("user-input").value = "";
         }
@@ -46,30 +60,41 @@
         function getRoundedNumber(number, type) {
             switch (type) {
                 case "tisíce":
-                    return Math.round(number / 1000) * 1000;
+                    return Math.floor((number + 500) / 1000) * 1000;
                 case "stovky":
-                    return Math.round(number / 100) * 100;
+                    return Math.floor((number + 50) / 100) * 100;
                 case "desítky":
-                    return Math.round(number / 10) * 10;
+                    return Math.floor((number + 5) / 10) * 10;
                 default:
                     return number;
             }
         }
 
-        document.getElementById("check-answer").addEventListener("click", () => {
+        function checkAnswer() {
             const userInput = Number(document.getElementById("user-input").value);
             const correctAnswer = getRoundedNumber(randomNumber, roundingType);
 
             if (userInput === correctAnswer) {
+                correctCount++;
                 document.getElementById("result").textContent = "Správně!";
                 document.getElementById("result").style.color = "green";
             } else {
+                incorrectCount++;
                 document.getElementById("result").textContent = `Špatně! Správná odpověď je ${correctAnswer}.`;
                 document.getElementById("result").style.color = "red";
             }
-        });
 
-        document.getElementById("new-number").addEventListener("click", generateNumber);
+            document.getElementById("correct-count").textContent = correctCount;
+            document.getElementById("incorrect-count").textContent = incorrectCount;
+
+            generateNumber();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key.toUpperCase() === requiredKey) {
+                checkAnswer();
+            }
+        });
 
         // Initialize with a random number
         generateNumber();
