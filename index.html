@@ -54,6 +54,7 @@
     <div class="stats">
         <p>Správně: <span id="correct-count">0</span></p>
         <p>Špatně: <span id="incorrect-count">0</span></p>
+        <p>Série výher: <span id="win-streak">0</span></p>
     </div>
     <div id="history">
         <h2>Historie špatných odpovědí</h2>
@@ -78,9 +79,10 @@
         let requiredKey = "";
         let correctCount = 0;
         let incorrectCount = 0;
+        let winStreak = 0;
 
-        const roundingLevels = ["tisíce", "stovky", "desítky"];
-        const allKeys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const roundingLevels = ["tisíce", "stovky", "desítky", "jednotky"];
+        const allKeys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
         function generateRandomKey() {
             return allKeys.charAt(Math.floor(Math.random() * allKeys.length));
@@ -106,6 +108,8 @@
                     return Math.floor((number + 50) / 100) * 100;
                 case "desítky":
                     return Math.floor((number + 5) / 10) * 10;
+                case "jednotky":
+                    return number; // Jednotky nemění hodnotu
                 default:
                     return number;
             }
@@ -133,17 +137,21 @@
 
             if (userInput === correctAnswer) {
                 correctCount++;
+                winStreak++;
                 document.getElementById("result").textContent = "Správně!";
                 document.getElementById("result").style.color = "green";
             } else {
                 incorrectCount++;
+                winStreak = 0; // Reset série při špatné odpovědi
                 document.getElementById("result").textContent = `Špatně! Správná odpověď je ${correctAnswer}.`;
                 document.getElementById("result").style.color = "red";
                 addToHistory(randomNumber, userInput, correctAnswer);
             }
 
+            // Aktualizace počítadel
             document.getElementById("correct-count").textContent = correctCount;
             document.getElementById("incorrect-count").textContent = incorrectCount;
+            document.getElementById("win-streak").textContent = winStreak;
 
             generateNumber();
         }
