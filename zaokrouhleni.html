@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaokrouhlování čísel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #new-number {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Zaokrouhlování čísel</h1>
+    <p>Zaokrouhli zobrazené číslo na <span id="rounding-type"></span>.</p>
+    <p id="random-number"></p>
+    <input type="number" id="user-input" placeholder="Zadej zaokrouhlené číslo">
+    <button id="check-answer">Ověřit odpověď</button>
+    <p id="result"></p>
+    <button id="new-number">Nové číslo</button>
+
+    <script>
+        let randomNumber = 0;
+        let roundingType = "";
+
+        const roundingLevels = ["tisíce", "stovky", "desítky"];
+
+        function generateNumber() {
+            randomNumber = Math.floor(Math.random() * 10001);
+            roundingType = roundingLevels[Math.floor(Math.random() * roundingLevels.length)];
+            document.getElementById("random-number").textContent = `Číslo: ${randomNumber}`;
+            document.getElementById("rounding-type").textContent = roundingType;
+            document.getElementById("result").textContent = "";
+            document.getElementById("user-input").value = "";
+        }
+
+        function getRoundedNumber(number, type) {
+            switch (type) {
+                case "tisíce":
+                    return Math.round(number / 1000) * 1000;
+                case "stovky":
+                    return Math.round(number / 100) * 100;
+                case "desítky":
+                    return Math.round(number / 10) * 10;
+                default:
+                    return number;
+            }
+        }
+
+        document.getElementById("check-answer").addEventListener("click", () => {
+            const userInput = Number(document.getElementById("user-input").value);
+            const correctAnswer = getRoundedNumber(randomNumber, roundingType);
+
+            if (userInput === correctAnswer) {
+                document.getElementById("result").textContent = "Správně!";
+                document.getElementById("result").style.color = "green";
+            } else {
+                document.getElementById("result").textContent = `Špatně! Správná odpověď je ${correctAnswer}.`;
+                document.getElementById("result").style.color = "red";
+            }
+        });
+
+        document.getElementById("new-number").addEventListener("click", generateNumber);
+
+        // Initialize with a random number
+        generateNumber();
+    </script>
+</body>
+</html>
