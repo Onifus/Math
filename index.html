@@ -42,14 +42,33 @@
         #history th {
             background-color: #f4f4f4;
         }
+        .mobile-toggle {
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            body {
+                font-size: 1rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            #result {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Zaokrouhlování čísel pro Adelku</h1>
+    <h1>Zaokrouhlování čísel</h1>
     <p>Zaokrouhli zobrazené číslo na <span id="rounding-type"></span>.</p>
     <p id="random-number"></p>
     <input type="number" id="user-input" placeholder="Zadej zaokrouhlené číslo" style="font-size: 1.2rem; padding: 8px;">
-    <p>Stiskni klávesu: <strong id="required-key"></strong> pro potvrzení.</p>
+    <p id="keyboard-mode">Stiskni klávesu: <strong id="required-key"></strong> pro potvrzení.</p>
+    <button id="submit-button" style="display: none; font-size: 1rem; padding: 10px;">Odeslat</button>
+    <div class="mobile-toggle">
+        <input type="checkbox" id="toggle-mode">
+        <label for="toggle-mode">Použít tlačítko místo klávesnice</label>
+    </div>
     <p id="result"></p>
     <div class="stats">
         <p>Správně: <span id="correct-count">0</span></p>
@@ -80,9 +99,10 @@
         let correctCount = 0;
         let incorrectCount = 0;
         let winStreak = 0;
+        let useButtonMode = false;
 
-        const roundingLevels = ["tisíce", "stovky", "desítky", "jednotky"];
-        const allKeys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const roundingLevels = ["tisíce", "stovky", "desítky"];
+        const allKeys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
         function generateRandomKey() {
             return allKeys.charAt(Math.floor(Math.random() * allKeys.length));
@@ -95,19 +115,22 @@
 
             document.getElementById("random-number").textContent = `Číslo: ${randomNumber}`;
             document.getElementById("rounding-type").textContent = roundingType;
-            document.getElementById("required-key").textContent = requiredKey;
+
+            if (!useButtonMode) {
+                document.getElementById("required-key").textContent = requiredKey;
+            }
             document.getElementById("result").textContent = "";
             document.getElementById("user-input").value = "";
         }
 
         function getRoundedNumber(number, type) {
             switch (type) {
-                case "stovky":
+                case "tisíce":
                     return Math.floor((number + 500) / 1000) * 1000;
-                case "desítky":
+                case "stovky":
                     return Math.floor((number + 50) / 100) * 100;
-                case "jednotky":
-                    return number; // Jednotky nemění hodnotu
+                case "desítky":
+                    return Math.floor((number + 5) / 10) * 10;
                 default:
                     return number;
             }
@@ -155,9 +178,29 @@
         }
 
         document.addEventListener("keydown", (event) => {
-            if (event.key.toUpperCase() === requiredKey) {
+            if (!useButtonMode && event.key.toUpperCase() === requiredKey) {
                 checkAnswer();
             }
+        });
+
+        document.getElementById("submit-button").addEventListener("click", () => {
+            if (useButtonMode) {
+                checkAnswer();
+            }
+        });
+
+        document.getElementById("toggle-mode").addEventListener("change", (event) => {
+            useButtonMode = event.target.checked;
+
+            if (useButtonMode) {
+                document.getElementById("keyboard-mode").style.display = "none";
+                document.getElementById("submit-button").style.display = "inline-block";
+            } else {
+                document.getElementById("keyboard-mode").style.display = "block";
+                document.getElementById("submit-button").style.display = "none";
+            }
+
+            generateNumber();
         });
 
         // Initialize with a random number
