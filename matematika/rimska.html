@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Převod římských čísel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #282c34;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        #roman {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        select {
+            padding: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Převod římských čísel</h1>
+
+    <label for="range">Vyberte rozsah čísel:</label>
+    <select id="range">
+        <option value="20">1-20</option>
+        <option value="50">1-50</option>
+        <option value="100">1-100</option>
+    </select>
+
+    <div id="roman"></div>
+    <input type="text" id="userAnswer" placeholder="Zadejte číslo" />
+    <button onclick="checkAnswer()">Odeslat odpověď</button>
+    <button onclick="displayRoman()">Přegenerovat</button>
+    <div class="result" id="result"></div>
+    <div id="correctAnswerText" class="result"></div>
+
+    <script>
+        // Seznam římských čísel a jejich arabských hodnot
+        const romanNumerals = [
+            { roman: 'I', value: 1 }, { roman: 'II', value: 2 }, { roman: 'III', value: 3 }, { roman: 'IV', value: 4 },
+            { roman: 'V', value: 5 }, { roman: 'VI', value: 6 }, { roman: 'VII', value: 7 }, { roman: 'VIII', value: 8 },
+            { roman: 'IX', value: 9 }, { roman: 'X', value: 10 }, { roman: 'XI', value: 11 }, { roman: 'XII', value: 12 },
+            { roman: 'XIII', value: 13 }, { roman: 'XIV', value: 14 }, { roman: 'XV', value: 15 }, { roman: 'XVI', value: 16 },
+            { roman: 'XVII', value: 17 }, { roman: 'XVIII', value: 18 }, { roman: 'XIX', value: 19 }, { roman: 'XX', value: 20 },
+            { roman: 'XXI', value: 21 }, { roman: 'XXII', value: 22 }, { roman: 'XXIII', value: 23 }, { roman: 'XXIV', value: 24 },
+            { roman: 'XXV', value: 25 }, { roman: 'XXVI', value: 26 }, { roman: 'XXVII', value: 27 }, { roman: 'XXVIII', value: 28 },
+            { roman: 'XXIX', value: 29 }, { roman: 'XXX', value: 30 }, { roman: 'XXXI', value: 31 }, { roman: 'XXXII', value: 32 },
+            { roman: 'XXXIII', value: 33 }, { roman: 'XXXIV', value: 34 }, { roman: 'XXXV', value: 35 }, { roman: 'XXXVI', value: 36 },
+            { roman: 'XXXVII', value: 37 }, { roman: 'XXXVIII', value: 38 }, { roman: 'XXXIX', value: 39 }, { roman: 'XL', value: 40 },
+            { roman: 'XLI', value: 41 }, { roman: 'XLII', value: 42 }, { roman: 'XLIII', value: 43 }, { roman: 'XLIV', value: 44 },
+            { roman: 'XLV', value: 45 }, { roman: 'XLVI', value: 46 }, { roman: 'XLVII', value: 47 }, { roman: 'XLVIII', value: 48 },
+            { roman: 'XLIX', value: 49 }, { roman: 'L', value: 50 }, { roman: 'LI', value: 51 }, { roman: 'LII', value: 52 },
+            { roman: 'LIII', value: 53 }, { roman: 'LIV', value: 54 }, { roman: 'LV', value: 55 }, { roman: 'LVI', value: 56 },
+            { roman: 'LVII', value: 57 }, { roman: 'LVIII', value: 58 }, { roman: 'LIX', value: 59 }, { roman: 'LX', value: 60 },
+            { roman: 'LXI', value: 61 }, { roman: 'LXII', value: 62 }, { roman: 'LXIII', value: 63 }, { roman: 'LXIV', value: 64 },
+            { roman: 'LXV', value: 65 }, { roman: 'LXVI', value: 66 }, { roman: 'LXVII', value: 67 }, { roman: 'LXVIII', value: 68 },
+            { roman: 'LXIX', value: 69 }, { roman: 'LXX', value: 70 }, { roman: 'LXXI', value: 71 }, { roman: 'LXXII', value: 72 },
+            { roman: 'LXXIII', value: 73 }, { roman: 'LXXIV', value: 74 }, { roman: 'LXXV', value: 75 }, { roman: 'LXXVI', value: 76 },
+            { roman: 'LXXVII', value: 77 }, { roman: 'LXXVIII', value: 78 }, { roman: 'LXXIX', value: 79 }, { roman: 'LXXX', value: 80 },
+            { roman: 'LXXXI', value: 81 }, { roman: 'LXXXII', value: 82 }, { roman: 'LXXXIII', value: 83 }, { roman: 'LXXXIV', value: 84 },
+            { roman: 'LXXXV', value: 85 }, { roman: 'LXXXVI', value: 86 }, { roman: 'LXXXVII', value: 87 }, { roman: 'LXXXVIII', value: 88 },
+            { roman: 'LXXXIX', value: 89 }, { roman: 'XC', value: 90 }, { roman: 'XCI', value: 91 }, { roman: 'XCII', value: 92 },
+            { roman: 'XCIII', value: 93 }, { roman: 'XCIV', value: 94 }, { roman: 'XCV', value: 95 }, { roman: 'XCVI', value: 96 },
+            { roman: 'XCVII', value: 97 }, { roman: 'XCVIII', value: 98 }, { roman: 'XCIX', value: 99 }, { roman: 'C', value: 100 }
+        ];
+
+        // Funkce pro generování náhodného římského čísla na základě vybraného rozsahu
+        function getRandomRoman() {
+            const range = document.getElementById('range').value;
+            const filteredRomans = romanNumerals.filter(roman => roman.value <= range);
+            const randomIndex = Math.floor(Math.random() * filteredRomans.length);
+            return filteredRomans[randomIndex];
+        }
+
+        // Zobrazí náhodné římské číslo
+        function displayRoman() {
+            const roman = getRandomRoman();
+            document.getElementById('roman').textContent = roman.roman;
+            document.getElementById('userAnswer').value = '';
+            document.getElementById('result').textContent = '';
+            document.getElementById('correctAnswerText').textContent = '';
+            window.correctAnswer = roman.value; // Uložíme správnou odpověď pro porovnání
+        }
+
+        // Funkce pro kontrolu odpovědi
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('userAnswer').value, 10);
+            const resultElement = document.getElementById('result');
+            const correctAnswerText = document.getElementById('correctAnswerText');
+            
+            if (userAnswer === window.correctAnswer) {
+                resultElement.textContent = 'Správně!';
+                resultElement.classList.remove('incorrect');
+                resultElement.classList.add('correct');
+                correctAnswerText.textContent = ''; // Vymažeme správnou odpověď po správné odpovědi
+            } else {
+                resultElement.textContent = 'Špatně, správná odpověď je: ' + window.correctAnswer;
+                resultElement.classList.remove('correct');
+                resultElement.classList.add('incorrect');
+                correctAnswerText.textContent = ''; // Zobrazíme správnou odpověď až po nesprávné odpovědi
+            }
+        }
+
+        // Inicializace
+        displayRoman();
+        document.getElementById('range').addEventListener('change', displayRoman);
+    </script>
+</body>
+</html>
