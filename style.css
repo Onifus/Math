@@ -1,0 +1,92 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 80%;
+    max-width: 1200px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.section {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.cestina {
+    background-color: #ffebe6;
+}
+
+.cestina h2 {
+    color: #d35400;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.matematika {
+    background-color: #e6f7ff;
+}
+
+.matematika h2 {
+    color: #2980b9;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.section ul {
+    list-style-type: none;
+}
+
+.section ul li {
+    margin: 10px 0;
+}
+
+.section ul li a {
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 20px;
+    border: 2px solid;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.cestina ul li a {
+    color: #d35400;
+    border-color: #d35400;
+}
+
+.cestina ul li a:hover {
+    background-color: #d35400;
+    color: white;
+}
+
+.matematika ul li a {
+    color: #2980b9;
+    border-color: #2980b9;
+}
+
+.matematika ul li a:hover {
+    background-color: #2980b9;
+    color: white;
+}
