@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procvičování Násobení a Dělení</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2980b9;
+        }
+
+        .exercise {
+            margin: 20px 0;
+        }
+
+        .exercise input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 100px;
+        }
+
+        .exercise button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #2980b9;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .exercise button:hover {
+            background-color: #1f6a91;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Procvičování Násobení a Dělení</h1>
+    <div id="exercises">
+        <!-- Vygenerovaná cvičení se objeví zde -->
+    </div>
+    <button onclick="generateExercises()">Nové Příklady</button>
+
+    <script>
+        function generateExercises() {
+            const exercisesContainer = document.getElementById('exercises');
+            exercisesContainer.innerHTML = ''; // Vymazat stará cvičení
+
+            const operations = ['*', '/'];
+            const factors = [10, 100, 1000];
+
+            for (let i = 0; i < 5; i++) {
+                const number = Math.floor(Math.random() * 900) + 100; // Náhodné číslo mezi 100 a 999
+                const operation = operations[Math.floor(Math.random() * operations.length)];
+                const factor = factors[Math.floor(Math.random() * factors.length)];
+
+                const correctAnswer =
+                    operation === '*'
+                        ? number * factor
+                        : number / factor;
+
+                const exerciseDiv = document.createElement('div');
+                exerciseDiv.className = 'exercise';
+                exerciseDiv.innerHTML = `
+                    <span>${number} ${operation} ${factor} = </span>
+                    <input type="text" data-correct-answer="${correctAnswer}">
+                    <button onclick="checkAnswer(this)">Zkontrolovat</button>
+                    <div class="feedback"></div>
+                `;
+                exercisesContainer.appendChild(exerciseDiv);
+            }
+        }
+
+        function checkAnswer(button) {
+            const input = button.previousElementSibling;
+            const feedback = button.nextElementSibling;
+            const userAnswer = parseFloat(input.value);
+            const correctAnswer = parseFloat(input.dataset.correctAnswer);
+
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = 'Správně!';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.textContent = `Špatně! Správná odpověď je ${correctAnswer}.`;
+                feedback.className = 'feedback incorrect';
+            }
+        }
+
+        // Generování příkladů při načtení stránky
+        generateExercises();
+    </script>
+</body>
+</html>
