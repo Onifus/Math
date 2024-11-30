@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Převody Jednotek pro 4. třídu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 5px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .output {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #00796b;
+        }
+        .conversion-result, .input-example {
+            margin: 10px 0;
+        }
+        .input-example input {
+            padding: 5px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Převody Jednotek pro 4. třídu</h1>
+
+    <!-- Výběr kategorie jednotek -->
+    <label for="category-select">Vyberte kategorii jednotek:</label>
+    <select id="category-select" onchange="updateUnitOptions(this.value)">
+        <option value="length">Délka</option>
+        <option value="weight">Hmotnost</option>
+        <option value="time">Čas</option>
+        <option value="area">Obsah</option>
+        <option value="volume">Objem</option>
+        <option value="temperature">Teplota</option>
+    </select>
+
+    <!-- Výběr konkrétní jednotky -->
+    <label for="unit-select">Vyberte jednotku:</label>
+    <select id="unit-select">
+        <!-- Možnosti se dynamicky naplní podle vybrané kategorie -->
+    </select>
+
+    <button onclick="displayConversions()">Zobrazit převody</button>
+
+    <!-- Výstup převodů -->
+    <div class="output" id="output"></div>
+
+    <!-- Příklady pro uživatele, kde se zadávají odpovědi -->
+    <h2>Převody, které si můžete vyzkoušet</h2>
+    <div id="user-examples">
+        <!-- Příklady se budou generovat zde -->
+    </div>
+    <button onclick="generateNewUserExamples()">Generovat nové příklady</button>
+
+    <script>
+        // Objekt pro převody mezi jednotkami
+        const unitCategories = {
+            length: {
+                units: ['mm', 'cm', 'm', 'km'],
+                conversions: {
+                    mm: { cm: 0.1, m: 0.001, km: 0.000001 },
+                    cm: { mm: 10, m: 0.01, km: 0.00001 },
+                    m: { mm: 1000, cm: 100, km: 0.001 },
+                    km: { mm: 1000000, cm: 100000, m: 1000 }
+                }
+            },
+            weight: {
+                units: ['mg', 'g', 'kg', 't'],
+                conversions: {
+                    mg: { g: 0.001, kg: 0.000001, t: 0.000000001 },
+                    g: { mg: 1000, kg: 0.001, t: 0.000001 },
+                    kg: { mg: 1000000, g: 1000, t: 0.001 },
+                    t: { mg: 1000000000, g: 1000000, kg: 1000 }
+                }
+            },
+            time: {
+                units: ['s', 'min', 'h', 'day'],
+                conversions: {
+                    s: { min: 1 / 60, h: 1 / 3600, day: 1 / 86400 },
+                    min: { s: 60, h: 1 / 60, day: 1 / 1440 },
+                    h: { s: 3600, min: 60, day: 1 / 24 },
+                    day: { s: 86400, min: 1440, h: 24 }
+                }
+            },
+            area: {
+                units: ['cm2', 'm2', 'km2'],
+                conversions: {
+                    cm2: { m2: 0.0001, km2: 1e-8 },
+                    m2: { cm2: 10000, km2: 1e-6 },
+                    km2: { cm2: 1e8, m2: 1000000 }
+                }
+            },
+            volume: {
+                units: ['ml', 'l', 'm3'],
+                conversions: {
+                    ml: { l: 0.001, m3: 1e-6 },
+                    l: { ml: 1000, m3: 1e-3 },
+                    m3: { ml: 1e6, l: 1000 }
+                }
+            },
+            temperature: {
+                units: ['C', 'F', 'K'],
+                conversions: {
+                    C: { 
+                        F: (temp) => temp * 9/5 + 32,
+                        K: (temp) => temp + 273.15 
+                    },
+                    F: { 
+                        C: (temp) => (temp - 32) * 5/9,
+                        K: (temp) => (temp - 32) * 5/9 + 273.15 
+                    },
+                    K: { 
+                        C: (temp) => temp - 273.15,
+                        F: (temp) => (temp - 273.15) * 9/5 + 32 
+                    }
+                }
+            }
+        };
+
+        // Funkce pro naplnění selectu jednotek podle vybrané kategorie
+        function updateUnitOptions(category) {
+            const unitSelect = document.getElementById('unit-select');
+            unitSelect.innerHTML = ''; // Vyprázdní předchozí jednotky
+
+            const units = unitCategories[category].units;
+            units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                unitSelect.appendChild(option);
+            });
+        }
+
+        // Funkce pro zobrazení převodů pro vybranou jednotku
+        function displayConversions() {
+            const category = document.getElementById('category-select').value;
+            const unit = document.getElementById('unit-select').value;
+            const conversions = unitCategories[category].conversions[unit];
+            const outputDiv = document.getElementById('output');
+
+            outputDiv.innerHTML = ''; // Vyprázdní předchozí výstupy
+
+            // Pokud je jednotka teplota
+            if (category === "temperature") {
+                const exampleValue = 25;  // Můžeme změnit hodnotu pro příklad
+                for (const [targetUnit, conversion] of Object.entries(conversions)) {
+                    let result = conversion(exampleValue);
+                    const div = document.createElement('div');
+                    div.classList.add('conversion-result');
+                    div.textContent = `Příklad: ${exampleValue} ${unit} = ${result} ${targetUnit}`;
+                    outputDiv.appendChild(div);
+                }
+            } else {
+                // Pro ostatní kategorie, které nemají funkce
+                for (const [targetUnit, conversion] of Object.entries(conversions)) {
+                    const result = conversion;
+                    const div = document.createElement('div');
+                    div.classList.add('conversion-result');
+                    div.textContent = `1 ${unit} = ${result} ${targetUnit}`;
+                    outputDiv.appendChild(div);
+                }
+            }
+        }
+
+        // Funkce pro generování nových příkladů pro uživatele
+        function generateNewUserExamples() {
+            // Vymazání předchozích příkladů
+            const examplesContainer = document.getElementById('user-examples');
+            examplesContainer.innerHTML = '';
+
+         const examples = [
+    { input: '100 cm', output: 'm', correct: '1 m' },
+    { input: '1 km', output: 'm', correct: '1000 m' },
+    { input: '500 g', output: 'kg', correct: '0.5 kg' },
+    { input: '10 h', output: 'min', correct: '600 min' },
+    { input: '5 m2', output: 'cm2', correct: '50000 cm2' },
+    { input: '2 km', output: 'm', correct: '2000 m' },
+    { input: '300 g', output: 'kg', correct: '0.3 kg' },
+    { input: '1.5 h', output: 'min', correct: '90 min' },
+    { input: '7 m2', output: 'cm2', correct: '70000 cm2' },
+    { input: '2.5 km', output: 'm', correct: '2500 m' },
+    { input: '8 h', output: 'min', correct: '480 min' },
+    { input: '200 mg', output: 'g', correct: '0.2 g' },
+    { input: '3 km', output: 'm', correct: '3000 m' },
+    { input: '50 cm', output: 'm', correct: '0.5 m' },
+    { input: '0.5 kg', output: 'g', correct: '500 g' },
+    { input: '1.2 m2', output: 'cm2', correct: '12000 cm2' },
+    { input: '2500 g', output: 'kg', correct: '2.5 kg' },
+    { input: '4 h', output: 'min', correct: '240 min' },
+    { input: '600 cm', output: 'm', correct: '6 m' },
+    { input: '0.25 km', output: 'm', correct: '250 m' },
+    { input: '2.8 kg', output: 'g', correct: '2800 g' },
+    { input: '5000 m', output: 'km', correct: '5 km' },
+    { input: '1500 g', output: 'kg', correct: '1.5 kg' },
+    { input: '20 m2', output: 'cm2', correct: '200000 cm2' },
+    { input: '0.7 km', output: 'm', correct: '700 m' },
+    { input: '0.25 m', output: 'cm', correct: '25 cm' },
+    { input: '3.5 h', output: 'min', correct: '210 min' },
+    { input: '50 g', output: 'kg', correct: '0.05 kg' },
+    { input: '15 m2', output: 'cm2', correct: '150000 cm2' },
+    { input: '2.2 kg', output: 'g', correct: '2200 g' },
+    { input: '80 cm', output: 'm', correct: '0.8 m' },
+    { input: '1.3 km', output: 'm', correct: '1300 m' },
+    { input: '1.1 m2', output: 'cm2', correct: '11000 cm2' },
+    { input: '0.9 kg', output: 'g', correct: '900 g' },
+    { input: '6 h', output: 'min', correct: '360 min' },
+    { input: '1000 cm', output: 'm', correct: '10 m' },
+    { input: '5 g', output: 'kg', correct: '0.005 kg' },
+    { input: '3000 m', output: 'km', correct: '3 km' },
+    { input: '0.15 km', output: 'm', correct: '150 m' },
+    { input: '4.5 kg', output: 'g', correct: '4500 g' },
+    { input: '30 m2', output: 'cm2', correct: '300000 cm2' },
+    { input: '1200 g', output: 'kg', correct: '1.2 kg' },
+    { input: '2 m', output: 'cm', correct: '200 cm' },
+    { input: '6.5 h', output: 'min', correct: '390 min' },
+    { input: '0.8 kg', output: 'g', correct: '800 g' },
+    { input: '1500 m', output: 'km', correct: '1.5 km' },
+    { input: '500 cm', output: 'm', correct: '5 m' },
+    { input: '0.2 m', output: 'cm', correct: '20 cm' },
+    { input: '2.5 g', output: 'kg', correct: '0.0025 kg' },
+    { input: '4 m2', output: 'cm2', correct: '40000 cm2' },
+    { input: '8000 m', output: 'km', correct: '8 km' },
+    { input: '0.05 kg', output: 'g', correct: '50 g' },
+    { input: '7.2 m2', output: 'cm2', correct: '72000 cm2' },
+    { input: '5.5 kg', output: 'g', correct: '5500 g' },
+    { input: '1000 m', output: 'km', correct: '1 km' },
+    { input: '400 cm', output: 'm', correct: '4 m' },
+    { input: '90 cm', output: 'm', correct: '0.9 m' },
+    { input: '0.4 m', output: 'cm', correct: '40 cm' },
+    { input: '0.6 kg', output: 'g', correct: '600 g' },
+    { input: '3500 m', output: 'km', correct: '3.5 km' },
+    { input: '2.1 kg', output: 'g', correct: '2100 g' },
+    { input: '0.15 m2', output: 'cm2', correct: '1500 cm2' },
+    { input: '0.2 kg', output: 'g', correct: '200 g' }
+];
+
+
+            // Vybere náhodný příklad
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+
+            const exampleDiv = document.createElement('div');
+            exampleDiv.classList.add('input-example');
+            exampleDiv.innerHTML = `
+                <p>Kolik je ${randomExample.input} ve ${randomExample.output}?</p>
+                <input type="text" id="user-answer" placeholder="Zadejte odpověď">
+                <button onclick="checkAnswer('${randomExample.correct}')">Zkontrolovat odpověď</button>
+                <p id="result-message"></p>
+            `;
+
+            examplesContainer.appendChild(exampleDiv);
+        }
+
+        // Funkce pro kontrolu odpovědi uživatele
+        function checkAnswer(correctAnswer) {
+            const userAnswer = document.getElementById('user-answer').value.trim();
+            const resultMessage = document.getElementById('result-message');
+
+            if (userAnswer === correctAnswer) {
+                resultMessage.textContent = "Správně!";
+                resultMessage.classList.add('correct');
+                resultMessage.classList.remove('incorrect');
+            } else {
+                resultMessage.textContent = `Nesprávně! Správná odpověď je: ${correctAnswer}`;
+                resultMessage.classList.add('incorrect');
+                resultMessage.classList.remove('correct');
+            }
+        }
+
+        // Generování nových příkladů při načtení stránky
+        window.onload = () => {
+            updateUnitOptions('length');
+            generateNewUserExamples();
+        };
+    </script>
+</body>
+</html>
